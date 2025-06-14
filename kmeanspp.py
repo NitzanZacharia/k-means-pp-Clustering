@@ -18,18 +18,18 @@ def getDistance(point1, point2):
 def kmeanspp(points, k):
     np.random.seed(1234)
     n = len(points)
-    ind = np.random.choise(n)
+    ind = np.random.choice(n)
     cents = [points[ind]]
     inds =[ind] #inds of points already chosen
 
-    for i in range(k):
+    for i in range(k-1):
         d_arr = []
         for x in points:
             min_d = min(getDistance(x, c) for c in cents)
             d_arr.append(min_d)
         sum_d = sum(d_arr)
         pr_arr = [d / sum_d for d in d_arr]
-        ind_next = np.random.choise(n, p=probs)
+        ind_next = np.random.choice(n, p=pr_arr)
         cents.append(points[ind_next])
         inds.append(ind_next)
     return inds, cents
@@ -51,7 +51,9 @@ def check_validation(k, n ,iter, eps):
     except:
         print("Incorrect number of iteration!")
         return False
-    if(eps<0):
+    
+    epsnum = float(iter)    
+    if(epsnum<0):
         print("invalid epsilon!")
         return False
     return True  
@@ -68,15 +70,16 @@ def main():
             temp = args
             args = temp[:2]+[300]+temp[2:]
             
-        
+        #push down to include n 
         #if input is not valid, print an error message and end the run
         valid_input = check_validation(args[1],n, args[2]) #add n!!!!!!
         if not valid_input:
             return
         k = int(float(args[1]))
         iter = int(float(args[2]))
-        eps = args[3]
+        eps = float(args[3])
         file1 = args[4]
         file2= args[5]
-        df1 = pd.read_csv(file1)
-        df2 = pd.read_csv(file2)
+        f1 = pd.read_csv(file1)
+        f2 = pd.read_csv(file2)
+        joined = pd.merge(f1, f2, on = f1.columns[0], how='inner')
