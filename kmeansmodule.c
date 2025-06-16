@@ -16,40 +16,81 @@ struct vector
     struct cord *cords;
 };
 
+int free_head_vec(struct vector *head_vec){
+    struct cord *curr_cord;
+    struct cord *tmp_cord;
+    struct vector *tmp_vec;
+    while(head_vec != NULL){
+        curr_cord = head_vec->cords;
+        while(curr_cord != NULL){
+            tmp_cord = curr_cord;
+            curr_cord = curr_cord->next;
+            free(tmp_cord);
+        }
+        tmp_vec = head_vec;
+        head_vec = head_vec->next;
+        free(tmp_vec);
+    }
+    return 0;
+}
+
 struct vector **convert_centroids(PyObject *py_centroids, int k, int num_cords){
     struct vector *vec;
     struct cord *head_cord, *curr_cord;
     PyObject* py_cords; 
     PyObject* double_object;
-    int i, j;
+    int i, j, item;
     struct vector **arr = malloc(k*sizeof(struct vector *));
     if(arr==NULL) return NULL;
 
     for(i=0; i<k; i++){
         vec = malloc(sizeof(struct vector));
-        if(vec == NULL) return NULL; /*need to free memory*/
+        if(vec == NULL){
+            for(item=0; item<i; item++){
+                free_head_vec(arr[item]);
+            }
+            free(arr);
+            return NULL;
+        } 
+        arr[i] = vec;
         vec->next = NULL;
+        vec->cords = NULL;
         py_cords = PyList_GetItem(py_centroids, i);
-        if (!PyList_Check(py_cords)) return NULL; /*need to free memory*/
+        if (!PyList_Check(py_cords)){
+            for(item=0; item<i+1; item++){
+                free_head_vec(arr[item]);
+            }
+            free(arr);
+            return NULL;
+        }
         head_cord = malloc(sizeof(struct cord)); 
-        if(head_cord == NULL) return NULL; /*need to free memory*/
+        if(head_cord == NULL){
+            for(item=0; item<i+1; item++){
+                free_head_vec(arr[item]);
+            }
+            free(arr);
+            return NULL;
+        }  
         curr_cord = head_cord;
         curr_cord->next = NULL;
-
+        vec->cords = head_cord;
         for(j=0; j<num_cords; j++){
             double_object = PyList_GetItem(py_cords, j);
             curr_cord->value = PyFloat_AsDouble(double_object);
             if(j+1 != num_cords){
                 curr_cord->next = malloc(sizeof(struct cord));
-                if(curr_cord->next == NULL) return NULL; /*need to free memory*/
+                if(curr_cord->next == NULL){
+                    for(item=0; item<i+1; item++){
+                        free_head_vec(arr[item]);
+                    }
+                    free(arr);
+                    return NULL;
+                }
                 curr_cord = curr_cord->next;
             }
             else curr_cord->next = NULL;
         }
-        vec->cords = head_cord;
-        arr[i] = vec;
     }
-
     return arr;
 }
 
@@ -81,6 +122,7 @@ static PyObject* fit(PyObject *self, PyObject *args){
     vec_size = PyList_Size(py_cords);
     d = (int)vec_size;
     centroids = convert_centroids(py_centroids, k, d);
+    if(centroids == NULL) return NULL;
 
 }
 
