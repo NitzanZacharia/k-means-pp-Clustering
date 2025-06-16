@@ -95,6 +95,7 @@ struct vector **convert_centroids(PyObject *py_centroids, int k, int num_cords){
 }
 
 struct vector **convert_clusters(PyObject *py_clusters){
+    return NULL;
     
 }
 
@@ -109,7 +110,7 @@ static PyObject* fit(PyObject *self, PyObject *args){
     int k;
     int d;
 
-    if(!PyArgs_ParseTuple(args, "OO", &py_centroids, &py_clusters)){
+    if(!PyArg_ParseTuple(args, "OO", &py_centroids, &py_clusters)){
         return NULL;
     }
 
@@ -123,14 +124,14 @@ static PyObject* fit(PyObject *self, PyObject *args){
     d = (int)vec_size;
     centroids = convert_centroids(py_centroids, k, d);
     if(centroids == NULL) return NULL;
-
+    clusters = convert_clusters(py_clusters);
 }
 
 static PyMethodDef kmeansMethods[] = {
     {"fit",
     (PyCFunction) fit,
     METH_VARARGS,
-    PyDoc_STR("ADD DOCSTRING")},
+    PyDoc_STR("A kmeans algorithm that sorts into k clusters")}, /*write what args it expects*/
     {NULL, NULL, 0, NULL}
 };
 
