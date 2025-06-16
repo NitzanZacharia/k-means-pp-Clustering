@@ -16,16 +16,14 @@ struct vector
     struct cord *cords;
 };
 
-struct vector **convert_centroids(PyObject *py_centroids, int k){
+struct vector **convert_centroids(PyObject *py_centroids, int k, int num_cords){
     struct vector *vec;
     struct cord *head_cord, *curr_cord;
     PyObject* py_cords; 
     PyObject* double_object;
-    Py_ssize_t num_cords;
     int i, j;
     struct vector **arr = malloc(k*sizeof(struct vector *));
     if(arr==NULL) return NULL;
-    if (!PyList_Check(py_centroids)) return NULL;
 
     for(i=0; i<k; i++){
         vec = malloc(sizeof(struct vector));
@@ -33,8 +31,7 @@ struct vector **convert_centroids(PyObject *py_centroids, int k){
         vec->next = NULL;
         py_cords = PyList_GetItem(py_centroids, i);
         if (!PyList_Check(py_cords)) return NULL; /*need to free memory*/
-        head_cord = malloc(sizeof(struct cord));
-        num_cords = PyList_Size(py_cords);
+        head_cord = malloc(sizeof(struct cord)); 
         if(head_cord == NULL) return NULL; /*need to free memory*/
         curr_cord = head_cord;
         curr_cord->next = NULL;
@@ -56,22 +53,58 @@ struct vector **convert_centroids(PyObject *py_centroids, int k){
     return arr;
 }
 
-struct vector **convert_clusters(PyObject *py_clusters, int k){
+struct vector **convert_clusters(PyObject *py_clusters){
     
 }
 
 static PyObject* fit(PyObject *self, PyObject *args){
     PyObject* py_centroids;
     PyObject* py_clusters;
-    int k;
-    int d;
+    PyObject* py_cords;
     struct vector **centroids;
     struct vector **clusters;
+    Py_ssize_t cent_size;
+    Py_ssize_t vec_size;
+    int k;
+    int d;
 
-    if(!PyArgs_ParseTuple(args, "OOii", &py_centroids, &py_clusters, &k, &d)){
+    if(!PyArgs_ParseTuple(args, "OO", &py_centroids, &py_clusters)){
         return NULL;
     }
 
-    centroids = convert_centroids(py_centroids, k);
+    if (!PyList_Check(py_centroids)) return NULL;
+    cent_size = PyList_Size(py_centroids);
+    k = (int)cent_size;
+    if(k<=0) return NULL;
+    py_cords = PyList_GetItem(py_centroids, 0);
+    if (!PyList_Check(py_cords)) return NULL;
+    vec_size = PyList_Size(py_cords);
+    d = (int)vec_size;
+    centroids = convert_centroids(py_centroids, k, d);
 
+}
+
+static PyMethodDef kmeansMethods[] = {
+    {"fit",
+    (PyCFunction) fit,
+    METH_VARARGS,
+    PyDoc_STR("ADD DOCSTRING")},
+    {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef kmeansmodule = {
+    PyModuleDef_HEAD_INIT,
+    "mykmeanspp",
+    NULL,
+    -1,
+    kmeansMethods
+};
+
+PyMODINIT_FUNC PyInit_mykmeanspp(void){
+    PyObject *m;
+    m = PyModule_Create(&kmeansmodule);
+    if(!m){
+        return NULL;
+    }
+    return m;
 }
