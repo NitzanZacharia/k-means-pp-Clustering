@@ -2,7 +2,7 @@ import sys
 import math
 import pandas as pd
 import numpy as np 
-import kmeanspp
+import mykmeanspp
 
 
 
@@ -15,7 +15,7 @@ def getDistance(point1, point2):
         dist += diff*diff
     return math.sqrt(dist)
 
-def kmeanspp(points, k):
+def kmeanspp_our(points, k):
     np.random.seed(1234)
     n = len(points)
     ind = np.random.choice(n)

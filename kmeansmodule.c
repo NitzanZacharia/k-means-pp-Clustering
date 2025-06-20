@@ -116,11 +116,12 @@ struct vector **convert_clusters(PyObject *py_clusters, int d, int k){
         free(head_vec);
         return NULL;
     }
-    curr_cord = head_cord;
-    curr_cord->next = NULL;
+    
     for(i=0; i<n; i++){
         curr_vec->cords = head_cord;
-        py_cords = PyList_GetItem(py_cords, i);
+        curr_cord = head_cord;
+        curr_cord->next = NULL;
+        py_cords = PyList_GetItem(py_clusters, i);
         if (!PyList_Check(py_cords)){
             free_head_vec(head_vec);
             return NULL;
@@ -178,7 +179,7 @@ double dist(struct cord *p, struct cord *q)
     return sqrt(sum); 
 }
 
-int e_convergence(struct vector **prev_centr, struct vector **curr_centr, int k, int e){
+int e_convergence(struct vector **prev_centr, struct vector **curr_centr, int k, double e){
     double curr_dist;
     int i;
     for(i = 0; i < k; i++){
@@ -192,7 +193,7 @@ int e_convergence(struct vector **prev_centr, struct vector **curr_centr, int k,
 
 int min_dist(struct vector *vec, struct vector **arr, int k){
     double min_dist = 1e100;
-    int min_idx;
+    int min_idx = -1;
     double curr_dist;
     struct cord *cor = vec->cords;
     int i;
@@ -331,6 +332,7 @@ struct vector **re_kluster(struct vector **cent_arr, struct vector **org_klst_ar
     for (a = 0; a < k; a++) {
         klst_arr[a] = NULL;
     }
+
     
     for (i = 0; i < k; i++) {
         head_vec = org_klst_arr[i];
@@ -366,7 +368,8 @@ struct vector **re_kluster(struct vector **cent_arr, struct vector **org_klst_ar
     return klst_arr;
 }
 
-struct vector **kmeans_algo(struct vector **init_cent, struct vector **init_clust, int k, int d, int iter, int e){
+
+struct vector **kmeans_algo(struct vector **init_cent, struct vector **init_clust, int k, int d, int iter, double e){
     struct vector **centroids;
     struct vector **new_centroids;
     struct vector **clusters;
@@ -374,7 +377,10 @@ struct vector **kmeans_algo(struct vector **init_cent, struct vector **init_clus
     int is_error = 0;
 
     centroids = malloc(k*sizeof(struct vector));
-    if(centroids == NULL) return NULL;
+    if(centroids == NULL) {
+        is_error=1;
+        return NULL;
+    }
     for(i=0; i<k; i++){
         centroids[i] = NULL;
     }
@@ -415,6 +421,37 @@ free_mem:
     return new_centroids;
 }
 
+PyObject* convertto_pyobject(struct vector **centroids, int k, int d){
+    PyObject* py_vector;
+    PyObject* py_list;
+    struct vector *vec;
+    struct cord *cor;
+    int i, j;
+
+    py_list = PyList_New(k);
+    if(!py_list) return NULL;
+    
+    for(i=0; i<k; i++){
+        py_vector = PyList_New(d);
+        if(!py_vector){
+            for(j=0; j<i; j++){
+                Py_XDECREF(PyList_GetItem(py_list, j));
+            }
+            Py_XDECREF(py_list);
+            return NULL;
+        }
+        vec = centroids[i];
+        cor = vec->cords;
+        for(j=0; j<d; j++){
+            PyList_SET_ITEM(py_vector, j, PyFloat_FromDouble(cor->value));
+            cor = cor->next;
+        }
+        PyList_SET_ITEM(py_list, i, py_vector);
+        free_head_vec(vec);
+    }
+    free(centroids);
+    return py_list;
+}
 
 static PyObject* fit(PyObject *self, PyObject *args){
     PyObject* py_centroids;
@@ -425,10 +462,11 @@ static PyObject* fit(PyObject *self, PyObject *args){
     struct vector **final_cent;
     Py_ssize_t cent_size;
     Py_ssize_t vec_size;
-    int k, d, i, e;
+    int k, d, i;
+    double e;
     int iter;
 
-    if(!PyArg_ParseTuple(args, "OOi", &py_centroids, &py_clusters, &iter, &e)){
+    if(!PyArg_ParseTuple(args, "OOid", &py_centroids, &py_clusters, &iter, &e)){
         return NULL;
     }
 
@@ -450,9 +488,10 @@ static PyObject* fit(PyObject *self, PyObject *args){
         free(centroids);
         return NULL;
     }
+
     final_cent = kmeans_algo(centroids, clusters, k, d, iter, e);
     if(final_cent == NULL) return NULL;
-    /*create func to convert final_cent to PyObject*/
+    return (convertto_pyobject(final_cent, k, d));
 }
 
 static PyMethodDef kmeansMethods[] = {
