@@ -103,6 +103,7 @@ def main():
 
         init_cents = np.array(cents, dtype=np.float64)
         #delete try\exp?
+        
         try:
             fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), iter, eps)
         except Exception as e:
