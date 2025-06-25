@@ -54,7 +54,7 @@ def check_validation(k, n ,iter, eps):
     
     epsnum = float(eps)    
     if(epsnum<0):
-        print("invalid epsilon!")
+        print("Invalid epsilon!")
         return False
     return True  
 
@@ -67,8 +67,7 @@ def main():
             print("Incorrect number of inputs!")
             return
         if len(args) == 5:
-            temp = args
-            args = temp[:2]+[300]+temp[2:]
+            args = args[:2]+[300]+args[2:]
             
         
         k = args[1]
@@ -93,3 +92,19 @@ def main():
         org_indc = joined.iloc[:, 0].to_numpy()
         firstln = [org_indc[i] for i in inds]
         print(",".join(str(x) for x in firstln))
+
+
+        init_cents = np.array(cents, dtype=np.float64)
+        fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), k, iter, eps)
+        for c in fin_cents:
+            soutput = []
+            for x in c:
+                r = round(x, 4)
+                s = str(r)
+                if '.' in s:
+                    fracl = len(s.split('.')[1])
+                    s+= '0'*(4-fracl)
+                else:
+                    s+='.0000'
+                soutput.append(s)
+            print(",".join(soutput))            
