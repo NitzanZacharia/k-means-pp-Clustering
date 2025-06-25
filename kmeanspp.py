@@ -59,10 +59,9 @@ def check_validation(k, n ,iter, eps):
     return True  
 
 def main():
+    
     try:
         args = sys.argv
-        #input_data = sys.stdin.readlines()
-        
         if len(args)<5 or len(args)>6:
             print("Incorrect number of inputs!")
             return
@@ -75,27 +74,40 @@ def main():
         eps = args[3]
         file1 = args[4]
         file2= args[5]
-        f1 = pd.read_csv(file1)
-        f2 = pd.read_csv(file2)
+        f1 = pd.read_csv(file1, header=None)
+        
+        f2 = pd.read_csv(file2, header=None)
+        
+
         joined = pd.merge(f1, f2, on = f1.columns[0], how='inner')
+        
         n = len(joined)
         joined.sort_values(by=joined.columns[0], inplace=True) 
+        
         #if input is not valid, print an error message and end the run
         valid_input = check_validation(k,n, iter, eps)
         if not valid_input:
             return
+           
         k = int(float(args[1]))
         iter = int(float(args[2]))
         eps = float(args[3])    
         points = joined.iloc[:, 1:].to_numpy()
+        
         inds, cents = kmeanspp_our(points, k)
+        
         org_indc = joined.iloc[:, 0].to_numpy()
         firstln = [org_indc[i] for i in inds]
-        print(",".join(str(x) for x in firstln))
+        print(",".join(str(int(x)) for x in firstln))
 
 
         init_cents = np.array(cents, dtype=np.float64)
-        fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), k, iter, eps)
+        #delete try\exp?
+        try:
+            fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), iter, eps)
+        except Exception as e:
+            print("C extension failed:", e)
+            return    
         for c in fin_cents:
             soutput = []
             for x in c:
@@ -108,3 +120,7 @@ def main():
                     s+='.0000'
                 soutput.append(s)
             print(",".join(soutput))            
+    except Exception:
+        print("An Error Has Occurred")        
+if __name__ == "__main__":
+    main()        
