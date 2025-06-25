@@ -52,7 +52,7 @@ def check_validation(k, n ,iter, eps):
         print("Incorrect number of iteration!")
         return False
     
-    epsnum = float(iter)    
+    epsnum = float(eps)    
     if(epsnum<0):
         print("invalid epsilon!")
         return False
@@ -62,7 +62,7 @@ def main():
     try:
         args = sys.argv
         #input_data = sys.stdin.readlines()
-        #n = len(input_data)
+        
         if len(args)<5 or len(args)>6:
             print("Incorrect number of inputs!")
             return
@@ -70,16 +70,26 @@ def main():
             temp = args
             args = temp[:2]+[300]+temp[2:]
             
-        #push down to include n 
-        #if input is not valid, print an error message and end the run
-        valid_input = check_validation(args[1],n, args[2]) #add n!!!!!!
-        if not valid_input:
-            return
-        k = int(float(args[1]))
-        iter = int(float(args[2]))
-        eps = float(args[3])
+        
+        k = args[1]
+        iter = args[2]
+        eps = args[3]
         file1 = args[4]
         file2= args[5]
         f1 = pd.read_csv(file1)
         f2 = pd.read_csv(file2)
         joined = pd.merge(f1, f2, on = f1.columns[0], how='inner')
+        n = len(joined)
+        joined.sort_values(by=joined.columns[0], inplace=True) 
+        #if input is not valid, print an error message and end the run
+        valid_input = check_validation(k,n, iter, eps)
+        if not valid_input:
+            return
+        k = int(float(args[1]))
+        iter = int(float(args[2]))
+        eps = float(args[3])    
+        points = joined.iloc[:, 1:].to_numpy()
+        inds, cents = kmeanspp_our(points, k)
+        org_indc = joined.iloc[:, 0].to_numpy()
+        firstln = [org_indc[i] for i in inds]
+        print(",".join(str(x) for x in firstln))
