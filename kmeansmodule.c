@@ -457,6 +457,7 @@ static PyObject* fit(PyObject *self, PyObject *args){
     PyObject* py_centroids;
     PyObject* py_clusters;
     PyObject* py_cords;
+    PyObject* py_result;
     struct vector **centroids;
     struct vector **clusters;
     struct vector **final_cent;
@@ -467,31 +468,53 @@ static PyObject* fit(PyObject *self, PyObject *args){
     int iter;
 
     if(!PyArg_ParseTuple(args, "OOid", &py_centroids, &py_clusters, &iter, &e)){
+        PyErr_SetString(PyExc_ValueError, "Invalid args!");
         return NULL;
     }
 
-    if (!PyList_Check(py_centroids)) return NULL;
+    if (!PyList_Check(py_centroids)){
+        PyErr_SetString(PyExc_ValueError, "Invalid centroids!");
+        return NULL;
+    }
     cent_size = PyList_Size(py_centroids);
     k = (int)cent_size;
-    if(k<=0) return NULL;
+    if(k<=0){
+        PyErr_SetString(PyExc_ValueError, "Invalid k!");
+        return NULL;
+    }
     py_cords = PyList_GetItem(py_centroids, 0);
-    if (!PyList_Check(py_cords)) return NULL;
+    if (!PyList_Check(py_cords)){
+        PyErr_SetString(PyExc_ValueError, "Invalid centroids!");
+        return NULL;
+    }
     vec_size = PyList_Size(py_cords);
     d = (int)vec_size;
     centroids = convert_centroids(py_centroids, k, d);
-    if(centroids == NULL) return NULL;
+    if(centroids == NULL){
+        PyErr_SetString(PyExc_ValueError, "Invalid centroids!");
+        return NULL;
+    }
     clusters = convert_clusters(py_clusters, d, k);
     if(clusters == NULL){
         for(i=0; i<k; i++){
             free_head_vec(centroids[i]);
         }
         free(centroids);
+        PyErr_SetString(PyExc_ValueError, "Invalid datapoints!");
         return NULL;
     }
 
     final_cent = kmeans_algo(centroids, clusters, k, d, iter, e);
-    if(final_cent == NULL) return NULL;
-    return (convertto_pyobject(final_cent, k, d));
+    if(final_cent == NULL) {
+        PyErr_SetString(PyExc_ValueError, "Something went wrong!");
+        return NULL;
+    }
+    py_result = convertto_pyobject(final_cent, k, d);
+    if(py_result == NULL){
+        PyErr_SetString(PyExc_ValueError, "Something went wrong!");
+        return NULL;
+    }
+    return (py_result);
 }
 
 static PyMethodDef kmeansMethods[] = {

@@ -38,22 +38,25 @@ def check_validation(k, n ,iter, eps):
     try:
         knum = float(k)
         if ((not knum.is_integer()) or knum>=n or knum<2):
-            print("Incorrect number of clusters!")
+            print("Invalid number of clusters!")
             return False
     except:
-        print("Incorrect number of clusters!")
+        print("Invalid number of clusters!")
         return False
     try:
         iternum = float(iter)
         if ((not iternum.is_integer()) or iternum>=1000 or iternum<2):
-            print("Incorrect number of iteration!")
+            print("Invalid maximum iteration!")
             return False
     except:
-        print("Incorrect number of iteration!")
+        print("Invalid maximum iteration!")
         return False
-    
-    epsnum = float(eps)    
-    if(epsnum<0):
+    try:
+        epsnum = float(eps)    
+        if(epsnum<0):
+            print("Invalid epsilon!")
+            return False
+    except:
         print("Invalid epsilon!")
         return False
     return True  
@@ -63,22 +66,20 @@ def main():
     try:
         args = sys.argv
         if len(args)<5 or len(args)>6:
-            print("Incorrect number of inputs!")
-            return
+            raise Exception("Incorrect number of inputs!")
         if len(args) == 5:
             args = args[:2]+[300]+args[2:]
             
-        
         k = args[1]
         iter = args[2]
         eps = args[3]
         file1 = args[4]
         file2= args[5]
+
         f1 = pd.read_csv(file1, header=None)
-        
+
         f2 = pd.read_csv(file2, header=None)
         
-
         joined = pd.merge(f1, f2, on = f1.columns[0], how='inner')
         
         n = len(joined)
@@ -87,8 +88,8 @@ def main():
         #if input is not valid, print an error message and end the run
         valid_input = check_validation(k,n, iter, eps)
         if not valid_input:
-            return
-           
+            exit(1)
+        
         k = int(float(args[1]))
         iter = int(float(args[2]))
         eps = float(args[3])    
@@ -104,11 +105,11 @@ def main():
         init_cents = np.array(cents, dtype=np.float64)
         #delete try\exp?
         
-        try:
-            fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), iter, eps)
-        except Exception as e:
-            print("C extension failed:", e)
-            return    
+        # try:
+        fin_cents = mykmeanspp.fit(init_cents.tolist(), points.tolist(), iter, eps)
+        # except Exception as e:
+        #     print("C extension failed:", e)
+        #     return    
         for c in fin_cents:
             soutput = []
             for x in c:
@@ -120,8 +121,10 @@ def main():
                 else:
                     s+='.0000'
                 soutput.append(s)
-            print(",".join(soutput))            
+            print(",".join(soutput))
+        return 0            
     except Exception:
-        print("An Error Has Occurred")        
+        print("An Error Has Occurred")
+        exit(1)      
 if __name__ == "__main__":
     main()        
