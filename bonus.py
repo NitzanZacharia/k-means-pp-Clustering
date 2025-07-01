@@ -1,22 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 from sklearn.datasets import load_iris
 from sklearn.cluster import KMeans
 
-#calculates the squared distance between two points
+#calculates the distance between two points
 def getDistance(point1, point2):
     d = len(point1)
     dist = 0.0
     for i in range(d):
         diff = float(point1[i])-float(point2[i])
         dist += diff*diff
-    return dist
-
+    return math.sqrt(dist)
 def comp_inrt(x, clusts, cents):
     inertia = 0.0
     for i in range(len(x)):
         cent = cents[clusts[i]]
-        dist = getDistance(x[i], cent)
+        dist = (getDistance(x[i], cent))**2
         inertia += dist
     return inertia
 def find_elbow(k_vals, inrts):
@@ -54,8 +54,7 @@ def main():
     plt.xlabel("K")
     plt.ylabel("Average Dispersion")
     plt.title("Elbow Method for selection of Optimal 'K' clusters")
-    plt.axvline(x=elbow_k, color='r', linestyle='--')
-    plt.annotate(f"Elbow at k={elbow_k}", xy=(elbow_k, inertias[elbow_k - 1]),
+    plt.annotate(f"Elbow Point", xy=(elbow_k, inrt[elbow_k - 1]),
                  xytext=(elbow_k + 0.5, inrt[elbow_k - 1] + 100),
                  arrowprops=dict(facecolor='red', shrink=0.05))
 
