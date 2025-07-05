@@ -521,7 +521,7 @@ static PyMethodDef kmeansMethods[] = {
     {"fit",
     (PyCFunction) fit,
     METH_VARARGS,
-    PyDoc_STR("A kmeans algorithm that sorts into k clusters")}, /*write what args it expects*/
+    PyDoc_STR("A kmeans algorithm that sorts into k clusters, expected: fit(centroids: list of k initial centroids (list of floats) , points: list of data points (list of floats), iter: maximum number of iterations (int), epsilon: convergence threshold (float))")}, 
     {NULL, NULL, 0, NULL}
 };
 
