@@ -1,14 +1,14 @@
 # k-means++ Clustering
 
-A Python implementation of the k-means++ clustering algorithm with a C extension module for optimized performance. This project combines Python's ease of use with C's computational efficiency to provide fast clustering on large datasets.
+A high-performance implementation of the k-means++ clustering algorithm in C with a Python interface. This project combines C's computational efficiency with Python's ease of use for fast clustering on large datasets.
 
 ## Overview
 
 This project implements the **k-means++ initialization algorithm** combined with standard k-means clustering. K-means++ improves upon basic k-means by using a smarter centroid initialization strategy, which often results in better clustering outcomes and faster convergence.
 
 The implementation features:
-- **Python wrapper** (`kmeanspp.py`) that handles data processing and initialization
-- **C extension module** (`kmeansmodule.c`) for fast iterative clustering computation
+- **C implementation** (`kmeansmodule.c`) for fast k-means++ initialization and clustering computation
+- **Python interface** (`kmeanspp.py`) that handles data processing, validation, and I/O
 - **Bonus analysis tool** (`bonus.py`) for finding optimal cluster numbers using the elbow method
 
 ## Features
@@ -84,8 +84,8 @@ This generates `elbow.png` showing the elbow curve and the detected optimal clus
 SoftwareProj-2/
 ├── README.md              # This file
 ├── setup.py              # Python setup script for C extension
-├── kmeanspp.py           # Main k-means++ Python implementation
-├── kmeansmodule.c        # C extension for fast clustering
+├── kmeanspp.py           # Python interface for data processing and I/O
+├── kmeansmodule.c        # C implementation of k-means++ algorithm
 ├── bonus.py              # Elbow method analysis tool
 └── [data files]          # Input CSV files
 ```
@@ -99,8 +99,8 @@ SoftwareProj-2/
    - Select next centroid with probability proportional to squared distance
    - This reduces likelihood of poor initialization
 
-### Iterative Clustering (C Extension)
-- Performed by `mykmeanspp.fit()` in the C module
+### Iterative Clustering (C Implementation)
+- Performed by `mykmeanspp.fit()` in the C extension
 - Assigns points to nearest centroid
 - Updates centroids as mean of assigned points
 - Continues until convergence (change < epsilon) or max iterations reached
@@ -120,8 +120,8 @@ Example:
 
 ## Language Composition
 
-- **C**: 71.6% (high-performance clustering computation)
-- **Python**: 28.4% (wrapper, preprocessing, analysis)
+- **C**: 71.6% (k-means++ algorithm implementation)
+- **Python**: 28.4% (interface, data processing, analysis tools)
 
 ## Error Handling
 
