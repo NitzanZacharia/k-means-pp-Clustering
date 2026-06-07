@@ -13,12 +13,12 @@ The implementation features:
 
 ## Features
 
-- ✅ k-means++ intelligent centroid initialization
-- ✅ Fast C-based clustering algorithm
-- ✅ CSV data input support
-- ✅ Configurable iterations and epsilon (convergence threshold)
-- ✅ Elbow method analysis for optimal cluster selection
-- ✅ Input validation for parameters
+-  k-means++ intelligent centroid initialization
+-  Fast C-based clustering algorithm
+-  CSV data input support
+-  Configurable iterations and epsilon (convergence threshold)
+-  Elbow method analysis for optimal cluster selection
+-  Input validation for parameters
 
 ## Requirements
 
