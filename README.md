@@ -137,3 +137,8 @@ The program validates input parameters and returns error codes:
 - CSV files are merged on first column (ID) using inner join
 - Data is sorted by ID before clustering
 - Centroids are output with exactly 4 decimal places
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+
